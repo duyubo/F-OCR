@@ -17,6 +17,7 @@
 #define Int 108
 #define Oin 109
 #define Sum 110
+#define Wide_hat 116
 #define Comma 118//,
 #define Point 120
 #define Rightarrow 130
@@ -39,10 +40,10 @@
 #define Frac 157
 #define Over_line 158
 #define Under_line 159
-#define Over_Rightarrow 160
-#define Wide_tilde 161
-#define Dot 162
-#define Ddot 163
+
+#define Wide_tilde 160
+#define Dot 161
+#define Over_Rightarrow 162
 //#define Cdot
 
 namespace Logical
@@ -86,7 +87,7 @@ namespace Logical
 			while (p < bufferEnd)
 			{
 				std::string s = "";
-				while (true)
+				while (p < bufferEnd)
 				{
 					switch (*p)
 					{
@@ -141,28 +142,45 @@ namespace Logical
 	}
 
 	void change_char(std::vector<inf> &set_initiation) {//deal with the char for the first time
-		for (int i = 0; i < set_initiation.size() - 1; i++) {  // avoid  error
-			if(set_initiation[i].x*set_initiation[i].y<=20){
-			       set_initiation[i].order=Point;
+		for (int i = 0; i < set_initiation.size(); i++) {  // avoid  error
+			if (set_initiation[i].w*set_initiation[i].l <= 9) {
+				set_initiation[i].order = Point;
 			}
-			if (set_initiation[i].order == 18 || set_initiation[i].order == 19||set_initiation[i].order==1||set_initiation[i].order==Vert) {
+		}
+		for(int i = 0; i < set_initiation.size(); i++){
+			if (set_initiation[i].order == 44 || set_initiation[i].order == 18 || set_initiation[i].order == 19 || set_initiation[i].order == 1 || set_initiation[i].order == Vert||set_initiation[i].order==21) {
 				int j = 0;
 				for (; j < set_initiation.size(); j++) {
-					if (set_initiation[j].order == Point && set_initiation[j].y< set_initiation[i].y - set_initiation[i].l / 2.0&&(set_initiation[j].x>set_initiation[i].x-set_initiation[i].w)&&(set_initiation[j].x<set_initiation[i].x+set_initiation[i].w)) {
+					if (set_initiation[j].order == Point && set_initiation[j].y< set_initiation[i].y - set_initiation[i].l / 2.0 && (set_initiation[j].x-set_initiation[j].w/2.0<set_initiation[i].x + set_initiation[i].w) && (set_initiation[j].x+set_initiation[j].w/2.0 > set_initiation[i].x - set_initiation[i].w)) {
 						break;
-					
+
 					}
 				}
 				if (j == set_initiation.size()) {
-					if(set_initiation[i].order==18||set_initiation[i].order==19)
-					     set_initiation[i].order = 1;
+					if (set_initiation[i].order == 44 || set_initiation[i].order == 18 || set_initiation[i].order == 19)
+						set_initiation[i].order = 1;
 				}
 				else {
-					if (set_initiation[i].order == 1||set_initiation[i].order==Vert)
+					if (set_initiation[i].order == 1 || set_initiation[i].order == Vert||set_initiation[i].order==21) {
 						set_initiation[i].order = 18;
+						set_initiation.erase(set_initiation.begin() + j);
+					}
+					else {
+						if (set_initiation[i].order == 44) {
+							set_initiation[i].order = 19;
+							set_initiation.erase(set_initiation.begin() + j);
+						
+						}
+						else {
+							set_initiation.erase(set_initiation.begin() + j);
+						}
+					}
 				}
 			}
 
+		 
+		}
+		for (int i = 0; i<set_initiation.size()-1;i++){
 			if ((set_initiation[i].order == Minus) && set_initiation[i + 1].order == Minus) {// = 
 				if ((set_initiation[i].w >= (set_initiation[i + 1].w)*0.9) && (set_initiation[i].w <= (set_initiation[i + 1].w*1.1)) && (set_initiation[i].x > set_initiation[i + 1].x - set_initiation[i + 1].w / 2) && (set_initiation[i].x < set_initiation[i + 1].x + set_initiation[i + 1].w / 2)) {
 					set_initiation[i + 1].w = set_initiation[i].w;
@@ -181,7 +199,7 @@ namespace Logical
 				else {
 					if ((set_initiation[i].order == Less) || (set_initiation[i].order == Larger)) { // >=  <=
 						for (int j = i + 1; (j != i - 3) && (j >= 0); j = j - 2) {
-							if ((set_initiation[j].w > set_initiation[i].w*0.9) && (set_initiation[j].w < set_initiation[i].w*1.1) && (set_initiation[j].y > set_initiation[i].y)) {
+							if ((set_initiation[j].w > set_initiation[i].w*0.9) && (set_initiation[j].w < set_initiation[i].w*1.1) && (set_initiation[j].y > set_initiation[i].y)&&(set_initiation[j].x>set_initiation[i].x-set_initiation[i].w/2.0)&&(set_initiation[j].x<set_initiation[i].x+set_initiation[i].w/2.0)&&(set_initiation[j].order==Under_line||set_initiation[j].order==Minus||set_initiation[j].order==Black_slash||set_initiation[j].order==Fan_slash)) {
 								if(set_initiation[i].order==Less)
 									set_initiation[j].order=Black_slash;
 								else
@@ -219,6 +237,7 @@ namespace Logical
 									}
 
 								}
+								
 
 							}
 
@@ -237,9 +256,9 @@ namespace Logical
 		for (int i = 0; i < set_initiation.size(); i++) {
 			if ((set_initiation[i].order == Minus)) {
 				if (i != (set_initiation.size() - 1)) {//if i==set_initiation.size()-1 the order of i dose not change
-					int j = i;
+					int j = 0;
 					for (; j < set_initiation.size(); j++) {//
-						if ((set_initiation[j].y + set_initiation[j].l / 2.0 > set_initiation[i].y - set_initiation[i].w) && (set_initiation[j].y < set_initiation[i].y) && ((set_initiation[j].x  > (set_initiation[i].x - set_initiation[i].w / 2)) && (set_initiation[j].x <= (set_initiation[i].x + set_initiation[i].w / 2))))
+						if ((set_initiation[j].y + set_initiation[j].l / 2.0 > set_initiation[i].y - set_initiation[i].w*1.5) && (set_initiation[j].y < set_initiation[i].y) && ((set_initiation[j].x  > (set_initiation[i].x - set_initiation[i].w / 2.0)) && (set_initiation[j].x <= (set_initiation[i].x + set_initiation[i].w / 2.0))))
 							break;
 					}
 					if (j != set_initiation.size()) {
@@ -250,8 +269,9 @@ namespace Logical
 							set_initiation.erase(set_initiation.begin() + j);
 						}
 						else {
+							j = 0;
 							for (; j < set_initiation.size(); j++) {
-								if ((set_initiation[j].y - set_initiation[j].l / 2.0 < set_initiation[i].y + set_initiation[i].w) && (set_initiation[j].y > set_initiation[i].y) && ((set_initiation[j].x > (set_initiation[i].x - set_initiation[i].w / 2)) && (set_initiation[j].x < (set_initiation[i].x + set_initiation[i].w / 2))))
+								if ((set_initiation[j].y - set_initiation[j].l / 2.0 < set_initiation[i].y + set_initiation[i].w*1.5) && (set_initiation[j].y > set_initiation[i].y) && ((set_initiation[j].x > (set_initiation[i].x - set_initiation[i].w / 2)) && (set_initiation[j].x < (set_initiation[i].x + set_initiation[i].w / 2))))
 									break;
 							}
 							if (j != set_initiation.size()) {//have up and down i may be fraction or =with up chars
@@ -275,6 +295,7 @@ namespace Logical
 									if (j != i - 1 && set_initiation[j+1].x - set_initiation[j+1].w / 2.0<set_initiation[i].x - set_initiation[i].w / 2.0) {
 										set_initiation[i].w = set_initiation[i].x + set_initiation[i].w / 2.0 - (set_initiation[j+1].x - set_initiation[j+1].w / 2.0);
 										set_initiation[i].x = set_initiation[i].w / 2.0 + set_initiation[j+1].x - set_initiation[j+1].w / 2.0;
+										set_initiation[j+1].w--;
 									}
 
 									set_initiation[i].char_kind = N4;
@@ -285,7 +306,7 @@ namespace Logical
 								set_initiation[i].char_kind = N4;
 								int j = i - 1;
 								for (; j >= 0; j--) {
-									if (set_initiation[j].x>set_initiation[i].x-set_initiation[i].w/2.0&&set_initiation[j].y<set_initiation[i].y) {
+									if (set_initiation[j].x+set_initiation[j].w/2.0>set_initiation[i].x-set_initiation[i].w/2.0&&set_initiation[j].y<set_initiation[i].y&&set_initiation[j].y+set_initiation[j].w/2.0>set_initiation[i].y-set_initiation[i].w*2) {
 										1;
 									}
 									else
@@ -294,15 +315,16 @@ namespace Logical
 								}
 
 								if (j != i - 1 && set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0<set_initiation[i].x - set_initiation[i].w / 2.0) {
-									set_initiation[i].w = ((set_initiation[i].x * 2) - (set_initiation[j + 1].x * 2 - set_initiation[j + 1].w));
+									set_initiation[i].w = set_initiation[i].x + set_initiation[i].w / 2.0 - (set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0);// ((set_initiation[i].x * 2) - (set_initiation[j + 1].x * 2 - set_initiation[j + 1].w));
+									set_initiation[i].x = set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0 + set_initiation[i].w / 2.0;
 								}
 							}
 						}
 					}
 					else {
-						j = i;
+						j = 0;
 						for (; j < set_initiation.size(); j++) {
-							if ((set_initiation[j].y - set_initiation[j].l / 2.0 < set_initiation[i].y + set_initiation[i].w) && (set_initiation[j].y > set_initiation[i].y) && ((set_initiation[j].x> (set_initiation[i].x - set_initiation[i].w / 2)) && (set_initiation[j].x  < (set_initiation[i].x + set_initiation[i].w / 2))))
+							if ((set_initiation[j].y - set_initiation[j].l / 2.0 < set_initiation[i].y + set_initiation[i].w*1.5) && (set_initiation[j].y > set_initiation[i].y) && ((set_initiation[j].x+set_initiation[j].w/2.5> (set_initiation[i].x - set_initiation[i].w / 2)) && (set_initiation[j].x -set_initiation[j].w/2.5 < (set_initiation[i].x + set_initiation[i].w / 2))))
 								break;
 						}
 						if (j != set_initiation.size()) {
@@ -329,7 +351,7 @@ namespace Logical
 								set_initiation[i].char_kind = N4;
 								int j = i - 1;
 								for (; j >= 0; j--) {
-									if (set_initiation[j].x>set_initiation[i].x-set_initiation[i].w/2.0) {
+									if ((set_initiation[j].x+set_initiation[j].w/2.5>set_initiation[i].x-set_initiation[i].w/2.0&&set_initiation[j].y>set_initiation[i].y&&set_initiation[j].y-set_initiation[j].l/2.0<set_initiation[i].y+set_initiation[i].w*1.8)) {
 										1;
 
 									}
@@ -339,7 +361,8 @@ namespace Logical
 								}
 
 								if (j != i - 1 && set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0<set_initiation[i].x - set_initiation[i].w / 2.0) {
-									set_initiation[i].w = ((set_initiation[i].x * 2) - (set_initiation[j + 1].x * 2 - set_initiation[j + 1].w));
+									set_initiation[i].w = set_initiation[i].x + set_initiation[i].w / 2.0 - (set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0);// ((set_initiation[i].x * 2) - (set_initiation[j + 1].x * 2 - set_initiation[j + 1].w));
+									set_initiation[i].x = set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0 + set_initiation[i].w / 2.0;
 								}
 							}
 						}
@@ -366,13 +389,24 @@ namespace Logical
 						}
 					}
 					else {
-						if ((set_initiation[i].order == Sim) && (i != set_initiation.size() - 1)) {
-							if ((set_initiation[i + 1].order == Sim) && (set_initiation[i + 1].y > set_initiation[i].y) && (set_initiation[i + 1].x == set_initiation[i].x)) {// ~ ~
+						if ((set_initiation[i].order == Sim) ) {
+							if ((i!=set_initiation.size()-1)&&(set_initiation[i + 1].order == Sim) && (set_initiation[i + 1].y > set_initiation[i].y) && (set_initiation[i + 1].x == set_initiation[i].x)) {// ~ ~
 								set_initiation[i].order = Approx;
 								//change size//
 								set_initiation[i].l = set_initiation[i + 1].y - set_initiation[i].y + set_initiation[i].l;
 								set_initiation[i].y = (set_initiation[i].y + set_initiation[i + 1].y) / 2;
 								set_initiation.erase(set_initiation.begin() + i + 1);
+							}
+							else {
+								for (int j = 0; j < set_initiation.size(); j++) {
+									if ((set_initiation[j].x-set_initiation[j].w/2.5<set_initiation[i].x + set_initiation[i].w / 2.0&&set_initiation[j].x+set_initiation[j].w/2.5>set_initiation[i].x - set_initiation[i].w / 2.0)&&set_initiation[j].y>set_initiation[i].y&&set_initiation[j].y-set_initiation[j].w/2.0<set_initiation[i].y+set_initiation[i].w*1.5) {
+										set_initiation[i].x = set_initiation[j].x;
+										set_initiation[i].w = set_initiation[j].w;
+										set_initiation[i].order = Wide_tilde;
+										set_initiation[i].char_kind = N4;
+									}
+								
+								}
 							}
 						}
 						else {
@@ -412,18 +446,18 @@ namespace Logical
 
 								}
 								else {
-									if ((set_initiation[i].order == 21||set_initiation[i].order==1)) {// lim
+									if ((set_initiation[i].order == 21||set_initiation[i].order==1||set_initiation[i].order==Vert)) {// lim
 										for (int j = i + 1; j < set_initiation.size(); j++) {
 											if ((set_initiation[j].x < set_initiation[i].x + set_initiation[i].l) && (set_initiation[j].y < set_initiation[i].y + set_initiation[i].l / 2.0) && (set_initiation[j].y > set_initiation[i].y - set_initiation[i].l / 2.0) && set_initiation[j].order == 18) {
 												for (int m = j + 1; m < set_initiation.size(); m++) {
 													if ((set_initiation[m].x < set_initiation[i].x + set_initiation[i].l*1.3) && (set_initiation[m].y < set_initiation[i].y + set_initiation[i].l / 2.0) && (set_initiation[m].y > set_initiation[i].y - set_initiation[i].l / 2.0) && set_initiation[m].order == 22) {
 														set_initiation[i].order = Lim;
+														set_initiation[i].char_kind = N1;
 														set_initiation[i].w = set_initiation[m].x - set_initiation[i].x + set_initiation[i].w / 2 + set_initiation[m].w / 2;
 														set_initiation[i].x = set_initiation[j].x;
-														set_initiation[i].char_kind = N1;
-														set_initiation.erase(set_initiation.begin() + j);
-														set_initiation.erase(set_initiation.begin() + j);
-														set_initiation.erase(set_initiation.begin() + m - 2);
+														
+														set_initiation.erase(set_initiation.begin() + j);	 
+														set_initiation.erase(set_initiation.begin() + m - 1);
 														break;
 													}
 												}
@@ -454,13 +488,13 @@ namespace Logical
 									}
 									else {
 										if (set_initiation[i].order == Add) {
-											if ((i + 1 != set_initiation.size()) && (set_initiation[i + 1].order == Minus) && (set_initiation[i + 1].x == set_initiation[i].x)) {//******* + -
+											if ((i + 1 != set_initiation.size()) && (set_initiation[i + 1].order == Minus) && (set_initiation[i + 1].x >set_initiation[i].x-set_initiation[i].w/2.0)&&(set_initiation[i + 1].x <set_initiation[i].x + set_initiation[i].w / 2.0)&&(set_initiation[i+1].y<set_initiation[i].y+set_initiation[i].l*0.65)) {//******* + -
 												set_initiation[i].order = Pm;
 												set_initiation[i].l = set_initiation[i + 1].y - set_initiation[i].y + (set_initiation[i + 1].l + set_initiation[i].l) / 2;
 												set_initiation.erase(set_initiation.begin() + i + 1);
 											}
 											else {
-												if ((i - 1 != -1) && (set_initiation[i - 1].order == Minus) && (set_initiation[i - 1].x == set_initiation[i].x)) {//****** - +
+												if ((i - 1 != -1) && (set_initiation[i - 1].order == Minus) && (set_initiation[i + 1].x >set_initiation[i].x - set_initiation[i].w / 2.0) && (set_initiation[i + 1].x <set_initiation[i].x + set_initiation[i].w / 2.0) && (set_initiation[i + 1].y>set_initiation[i].y - set_initiation[i].l*0.65)) {//****** - +
 													set_initiation[i].order = Mp;
 													set_initiation[i].l = set_initiation[i].y - set_initiation[i - 1].y + (set_initiation[i - 1].l + set_initiation[i].l) / 2;
 													set_initiation.erase(set_initiation.begin() + i - 1);
@@ -470,11 +504,29 @@ namespace Logical
 											}
 										}
 										else {
-											if (set_initiation[i].order == Rightarrow || set_initiation[i].order == Sim) {
+											if (set_initiation[i].order == Rightarrow ) {
 												set_initiation[i].char_kind = N4;
+												int j = i - 1;
+												for (; j >= 0; j--) {
+													if ((set_initiation[j].y - set_initiation[j].l / 2.0>set_initiation[i].y ) &&set_initiation[j].x+set_initiation[j].w/3.0>set_initiation[i].x-set_initiation[i].w/2.0) {
+														set_initiation[i].order = Over_Rightarrow;
+
+													}
+													else
+														break;
+
+												}
+
+												if (j != i - 1 && set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0<set_initiation[i].x - set_initiation[i].w / 2.0) {
+													set_initiation[i].w = set_initiation[i].x + set_initiation[i].w / 2.0 - (set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0);// ((set_initiation[i].x * 2) - (set_initiation[j + 1].x * 2 - set_initiation[j + 1].w));
+													set_initiation[i].x = set_initiation[j + 1].x - set_initiation[j + 1].w / 2.0 + set_initiation[i].w / 2.0;
+												}
+
+
+
 											}
 											else {
-												if ((set_initiation[i].order == Sum) || (set_initiation[i].order == Prod) || (set_initiation[i].char_kind == Int) || (set_initiation[i].char_kind == Oin)) {
+												if ((set_initiation[i].order == Sum) || (set_initiation[i].order == Prod) || (set_initiation[i].order == Int) || (set_initiation[i].order == Oin)) {
 													set_initiation[i].char_kind = N1;
 													int j = i - 1;
 													for (; j >= 0; j--) {
@@ -505,6 +557,21 @@ namespace Logical
 															else {
 																set_initiation[i].char_kind = N4;
 															}
+														}
+														else {
+															if (set_initiation[i].order == Wide_hat) {
+																for (int j = 0; j < set_initiation.size(); j++) {
+																	if ((set_initiation[j].x-set_initiation[j].w/2.5<set_initiation[i].x + set_initiation[i].w / 2.0&&set_initiation[j].x+set_initiation[i].w/2.5>set_initiation[i].x - set_initiation[i].w / 2.0)&&set_initiation[j].y>set_initiation[i].y&&set_initiation[j].y - set_initiation[j].w / 2.0<set_initiation[i].y + set_initiation[i].w*1.5) {
+																		set_initiation[i].x = set_initiation[j].x;
+																		set_initiation[i].w = set_initiation[j].w;
+																		set_initiation[i].char_kind = N4;
+																	}
+
+																}
+															
+															}
+														
+														
 														}
 													}
 												}
@@ -553,21 +620,40 @@ namespace Logical
 			std::vector<inf> information[2];
 			int i = 0;
 			while (set.size() != 0) {
-				if ((set[0].y + set[0].l / 2.0 < cha.y - cha.l*0.15) || (set[0].y - set[0].l / 2.0 > cha.y + cha.l*0.15)) {
-					if (set[0].y + set[0].l / 2.0 < cha.y - cha.l*0.15) {
-						information[0].push_back(set[0]);//save up chars
-						set.erase(set.begin());
+				if (cha.order != Int&&cha.order!=Oin) {
+					if ((set[0].y + set[0].l / 2.0 < cha.y - cha.l*0.5) || (set[0].y - set[0].l / 2.0 > cha.y + cha.l*0.5)) {
+						if (set[0].y + set[0].l / 2.0 < cha.y - cha.l*0.5) {
+							information[0].push_back(set[0]);//save up chars
+							set.erase(set.begin());
+						}
+						else {
+							information[1].push_back(set[0]);//save down chars
+							set.erase(set.begin());
+						}
 					}
 					else {
-						information[1].push_back(set[0]);//save down chars
-						set.erase(set.begin());
+						break;
 					}
 				}
 				else {
-					break;
+					if (((set[0].y + set[0].l / 2.0 < cha.y - cha.l*0.15) || (set[0].y - set[0].l / 2.0 > cha.y + cha.l*0.15) )&& set[0].order != Over_line&&set[0].order != Wide_tilde&&set[0].order != Wide_hat&&set[0].order != Under_line) {
+						if (set[0].y + set[0].l / 2.0 < cha.y - cha.l*0.15) {
+							information[0].push_back(set[0]);//save up chars
+							set.erase(set.begin());
+						}
+						else {
+							information[1].push_back(set[0]);//save down chars
+							set.erase(set.begin());
+						}
+					}
+					else {
+						break;
+					}
+				
+				
+				
 				}
 			}
-
 
 
 			for (i = 0; i < 2; i++) {
@@ -590,14 +676,14 @@ namespace Logical
 
 
 		if (cha.char_kind == N4) {
-			if (cha.order == Under_line || cha.order == Over_line || cha.order == Sim || cha.order == Rightarrow || cha.order == Point) {//!!!!!!!!!!!!! //if  up-  down-  up->  up~  up. up..
+			if (cha.order == Under_line || cha.order == Over_line || cha.order == Wide_hat || cha.order ==Over_Rightarrow || cha.order == Dot||cha.order==Wide_tilde) {//!!!!!!!!!!!!! //if  up-  down-  up->  up~  up. up..
 				//std::vector<tree>::iterator p_zhongjian=prev(tree_set.end());
 				// cha=set[0];
 				std::vector<inf> information;
-				if (cha.order != Point) {
+				if (cha.order != Dot) {
 					while (set.size() != 0) {
-						if ((cha.x - cha.w / 2.0 < set[0].x) && (set[0].x < cha.x + cha.w / 2.0)) {
-
+						if ((cha.x - cha.w / 2.0 < set[0].x+set[0].w/3.5) && (set[0].x-set[0].w/3.5 < cha.x + cha.w / 2.0)) {
+						
 							information.push_back(set[0]);
 							set.erase(set.begin());
 						}
@@ -609,7 +695,7 @@ namespace Logical
 				else {
 					while (set.size() != 0) {
 						if ((set[0].x - set[0].w / 2.0 < cha.x) && (cha.x < set[0].x + set[0].w / 2.0)) {
-
+				
 							information.push_back(set[0]);
 							set.erase(set.begin());
 						}
@@ -618,12 +704,6 @@ namespace Logical
 					}
 				}
 				if (information.size() != 0) {
-					if (cha.order == Rightarrow)
-						cha.order = Over_Rightarrow;
-					else if (cha.order == Sim)
-						cha.order = Wide_tilde;
-					else if (cha.order == Point)
-						cha.order = Dot;
 
 					tree tree_zhongjian;
 					initiation_struct(tree_zhongjian);
@@ -652,7 +732,7 @@ namespace Logical
 				}
 				std::vector<inf> information[2];
 				for (std::vector<inf>::iterator it = set_zhongjian.begin(); it != set_zhongjian.end(); it++) {
-					if ((((*it).y - (*it).l / 2.0) < cha.y))//up
+					if (((*it).y + (*it).l / 2.0) < cha.y)//up
 						information[0].push_back(*it);
 					else                             //down
 						information[1].push_back(*it);
@@ -690,57 +770,73 @@ namespace Logical
 				else
 					break;
 			}
-			sort(set.begin(), set.end());
-			tree zhongjian;
-			initiation_struct(zhongjian);
-			zhongjian.order = set_zhongjian[0].order;
-			tree_set.push_back(zhongjian);
-			//set_zhongjian.erase(set_zhongjian.begin());
-			tree_set[p].tree_down = tree_set.size() - 1;
-			inf cha_zhongjian = set_zhongjian[0];
-			set_zhongjian.erase(set_zhongjian.begin());
-			///****************** we should make sure the p(pointer) points to the right position *************
 
-			search(cha_zhongjian, set_zhongjian, tree_set);
+			sort(set.begin(), set.end());
+			if (set_zhongjian.size() != 0) {
+				tree zhongjian;
+				initiation_struct(zhongjian);
+				zhongjian.order = set_zhongjian[0].order;
+				tree_set.push_back(zhongjian);
+				//set_zhongjian.erase(set_zhongjian.begin());
+				tree_set[p].tree_down = tree_set.size() - 1;
+				inf cha_zhongjian = set_zhongjian[0];
+				set_zhongjian.erase(set_zhongjian.begin());
+				///****************** we should make sure the p(pointer) points to the right position *************
+
+				search(cha_zhongjian, set_zhongjian, tree_set);
+			}
 			//////////////
 
 
 		}
 		///*char_kind==N0          *******************************************************************************
 		if (cha.char_kind == N0) { //we can also judge the right_up and right_down by the lowest and highest lines
-			if (cha.order != Comma&&cha.order!=Point&&cha.order!=Equal&&cha.order!=Equiv&&cha.order!=121&&cha.order<81&&cha.order>99&&cha.order!=123&&cha.order!=125&&cha.order!=126&&cha.order!=134) {
+			if (cha.order != Comma&&cha.order!=Point&&cha.order!=Equal&&cha.order!=Equiv&&cha.order!=121&&((cha.order<81||cha.order>92))&&(cha.order<94||cha.order>99)&&cha.order!=123&&cha.order!=125&&cha.order!=126&&cha.order!=134) {
 
 				std::vector<inf> set_zhongjian;
 				std::vector<inf> information[2];
-				while (set.size() != 0) {//select all the smaller char around the char;
-					if ( (set[0].order != Over_line&&set[0].order != Under_line&&set[0].order != Rightarrow&&set[0].order != Sim)) {
-						if (set[0].order == Minus || set[0].order == Frac || set[0].order == Equal) {
-							if ((set[0].y - set[0].l / 2.0 >= cha.y + cha.l*0.2) || (set[0].y + set[0].l / 2.0 <= cha.y - cha.l*0.2)) {
-								set_zhongjian.push_back(set[0]);
+				while (set.size() != 0) { 
+					if ( (set[0].order != Over_line&&set[0].order != Under_line&&set[0].order != Wide_hat&&set[0].order!=Wide_tilde&&set[0].order!=Over_Rightarrow)) {
+						if (set[0].order == Minus || set[0].order == Frac ||set[0].order == Equal||(set[0].order>=Add&&set[0].order<=92)||(set[0].order>=95&&set[0].order<=99)) {
+							if ((set[0].y>= cha.y + cha.l*0.3) ||(set[0].y+set[0].l/2.0>cha.y+cha.l*0.8&&set[0].l<cha.l*1.6)) {//down
+							    information[1].push_back(set[0]);
 								set.erase(set.begin());
 							}
-							else
-								break;
+							else {
+								if( (set[0].y + set[0].l / 2.0 <= cha.y - cha.l*0.2)||(set[0].y-set[0].l/2.0<cha.y-cha.l*0.8&&set[0].l<cha.l*1.6)) {//up
+									information[0].push_back(set[0]);
+									set.erase(set.begin());
+								}
+							    else
+								    break;
+							}
+							
 						}
 						else {
 							if (set[0].order == Comma || set[0].order == Point) {
-								if (set[0].y > cha.y + cha.l*0.65) {
-
-									set_zhongjian.push_back(set[0]);
+								if (set[0].y > cha.y + cha.l*0.7) {//down
+									information[1].push_back(set[0]);
 									set.erase(set.begin());
 								}
-								else
-									break;
+								else {
+									if (set[0].y<cha.y-cha.l*0.3) {
+										information[0].push_back(set[0]);
+										set.erase(set.begin());	
+									}
+								    else
+									   break;
+								}
+								
 							}
 							else {
-								if (set[0].order == 11 || set[0].order == 20 || set[0].order == 21 || set[0].order == 17||set[0].order==78) {//bhkl
-									if (set[0].y - set[0].l / 2.0 > cha.y - cha.l*0.36||set[0].l<cha.l*0.6) {//down
+								if (set[0].order == 11 || set[0].order == 20 || set[0].order == 21 || set[0].order == 17||set[0].order==78||(set[0].order>=0&&set[0].order<=9)) {//bhkl0123456789
+									if (set[0].y - set[0].l / 2.0 > cha.y - cha.l*0.33&&(set[0].l<cha.l*1.33)) {//down
 										information[1].push_back(set[0]);
 										set.erase(set.begin());
 
 									}
 									else {
-										if (set[0].y+set[0].l/2.0<cha.y+cha.l/4.0) {//up
+										if (set[0].y+set[0].l/2.0<cha.y+cha.l*0.25) {//up
 											information[0].push_back(set[0]);
 											set.erase(set.begin());
 										
@@ -751,14 +847,14 @@ namespace Logical
 									
 								}
 								else{
-									if (set[0].order != 25 && set[0].order != 26 && set[0].order != 15 && set[0].order != 16 && set[0].order != 19 && set[0].order != 34&&set[0].order!=49) {//!=pqgjyQ
-										if (set[0].y - set[0].l / 2.0 > cha.y + cha.l*0.15) {//down
+									if (set[0].order!=Fan_slash&&set[0].order != Black_slash&&set[0].order != 56&&set[0].order!=49 && set[0].order != 61 && set[0].order != 25 && set[0].order != 26 && set[0].order != 15 && set[0].order != 16 && set[0].order != 19 && set[0].order != 34 && set[0].order != 49) {//!=pqgjyQ
+										if (set[0].y - set[0].l / 2.0 > cha.y + cha.l*0.18||(set[0].y-set[0].l/2.0>cha.y&&set[0].l<=0.4*cha.l)||(((set[0].y+set[0].l/2.0>cha.y+cha.l*0.5+set[0].l*0.08)||set[0].y+set[0].l/2.0>cha.y+cha.l*0.6)&&set[0].l<=cha.l*1.08)) {//down
 											information[1].push_back(set[0]);
 											set.erase(set.begin());
 
 										}
 										else {
-											if (set[0].y+set[0].l/2.0<cha.y) {//up
+											if (set[0].y+set[0].l/2.0<cha.y+cha.l*0.1) {//up
 												information[0].push_back(set[0]);
 												set.erase(set.begin());
 
@@ -770,8 +866,8 @@ namespace Logical
 
 									}
 									else {
-										if (set[0].order == 25||set[0].order==26||set[0].order==15||set[0].order==16||set[0].order==19||set[0].order==34) {//pqgQj
-											if (set[0].y + set[0].l / 2.0 > cha.y + cha.l*0.85||set[0].y-set[0].l/2.0>cha.y+cha.l*0.15 ||set[0].l<0.5*cha.l) {//down
+										if (set[0].order==Fan_slash||set[0].order==Black_slash||set[0].order==49||set[0].order==56||set[0].order==61||set[0].order == 25||set[0].order==26||set[0].order==15||set[0].order==16||set[0].order==19||set[0].order==34) {//pqgQj
+											if (set[0].y + set[0].l / 2.0 > cha.y + cha.l*0.5+set[0].l*0.4||set[0].y-set[0].l/2.0>cha.y+cha.l*0.15 ||set[0].l<0.5*cha.l) {//down
 												information[1].push_back(set[0]);
 												set.erase(set.begin());
 
@@ -814,7 +910,7 @@ namespace Logical
 				*/
 				for (std::vector<inf>::iterator it = set_zhongjian.begin(); it != set_zhongjian.end(); it++) {
 
-					if ((*it).y + (*it).l / 2.0 <= cha.y)//right_up //avoid error
+					if ((*it).y +(*it).l*0.2 <= cha.y)//right_up //avoid error
 						information[0].push_back(*it);
 
 					else  //right_down
@@ -847,7 +943,9 @@ namespace Logical
 
 			   //end
 			}
-		}
+			 
+
+}
 		if (set.size() != 0 && set[0].x > cha.x) {// link this char to the next char
 			cha = set[0];
 			set.erase(set.begin());
@@ -865,7 +963,7 @@ namespace Logical
 	void change_string(int p, const std::vector<tree> &tree_set, std::string &result, const std::vector<std::string> &table) {
 		if (p != -1) {
 			if (tree_set[p].order == Frac) {
-				result += "\\frac{";//.append();
+				result += "\\frac {";//.append();
 				change_string(tree_set[p].tree_right_up, tree_set, result, table);
 				result += "}{";
 				//result.append("}{");
@@ -875,13 +973,13 @@ namespace Logical
 			}
 			else {
 				if (tree_set[p].order == Sqrt) {
-					result += "\\sqrt{";//.append();
+					result += "\\sqrt {";//.append();
 					change_string(tree_set[p].tree_down, tree_set, result, table);
 					result += "}";//.append();
 
 				}
 				else {
-					if (tree_set[p].order == Over_line || tree_set[p].order == Under_line || tree_set[p].order == Over_Rightarrow || tree_set[p].order == Sim) {
+					if (tree_set[p].order == Over_line || tree_set[p].order == Under_line || tree_set[p].order == Over_Rightarrow || tree_set[p].order == Wide_tilde||tree_set[p].order==Wide_hat) {
 						result += table[tree_set[p].order];
 						result += "{";//.append("{");
 						change_string(tree_set[p].tree_down, tree_set, result, table);
@@ -891,7 +989,7 @@ namespace Logical
 						result += table[tree_set[p].order];
 						if (tree_set[p].tree_right_up != -1) {
 							if ((tree_set[p].tree_right_up == Dot && tree_set[tree_set[p].tree_right_up].next == -1)) {
-								result += "\\Dot";//.append();
+								result += "\\Dot ";//.append();
 								result.append(table[tree_set[p].order]);
 							}
 							else {
